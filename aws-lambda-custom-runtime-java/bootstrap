@@ -1,0 +1,8 @@
+#!/bin/sh
+
+$LAMBDA_TASK_ROOT/jre19-slim/bin/java \
+    --add-opens java.base/java.util=ALL-UNNAMED \
+    -XX:+TieredCompilation \
+    -XX:TieredStopAtLevel=1 \
+    -XX:+UseSerialGC \
+    -jar aws-lambda-custom-runtime-java-1.0.jar
