@@ -1,0 +1,101 @@
+{
+  "version": "36.0.0",
+  "artifacts": {
+    "IncomeCheckStack.assets": {
+      "type": "cdk:asset-manifest",
+      "properties": {
+        "file": "IncomeCheckStack.assets.json",
+        "requiresBootstrapStackVersion": 6,
+        "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
+      }
+    },
+    "IncomeCheckStack": {
+      "type": "aws:cloudformation:stack",
+      "environment": "aws://unknown-account/us-west-2",
+      "properties": {
+        "templateFile": "IncomeCheckStack.template.json",
+        "terminationProtection": false,
+        "validateOnSynth": false,
+        "assumeRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-deploy-role-${AWS::AccountId}-us-west-2",
+        "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-cfn-exec-role-${AWS::AccountId}-us-west-2",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-us-west-2/dbf598072154d59bd3e7dc0527dfb3db8b8336c281f42ed2492ea48f4946955c.json",
+        "requiresBootstrapStackVersion": 6,
+        "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
+        "additionalDependencies": [
+          "IncomeCheckStack.assets"
+        ],
+        "lookupRole": {
+          "arn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-lookup-role-${AWS::AccountId}-us-west-2",
+          "requiresBootstrapStackVersion": 8,
+          "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
+        }
+      },
+      "dependencies": [
+        "IncomeCheckStack.assets"
+      ],
+      "metadata": {
+        "/IncomeCheckStack/lambdaExecutionRole/Policy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "lambdaExecutionRolePolicy7C6FDEA8"
+          }
+        ],
+        "/IncomeCheckStack/income-check-lambda/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "incomechecklambdaCFA53C7C"
+          }
+        ],
+        "/IncomeCheckStack/income-check-lambda/SqsEventSource:IncomeCheckStackincomechecktaskqueue0B3F64C2/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "incomechecklambdaSqsEventSourceIncomeCheckStackincomechecktaskqueue0B3F64C29A9E8743"
+          }
+        ],
+        "/IncomeCheckStack/income-check-task-queue/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "incomechecktaskqueueA2B9D2A3"
+          }
+        ],
+        "/IncomeCheckStack/income-check-task-queue/Policy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "incomechecktaskqueuePolicy85D885BA"
+          }
+        ],
+        "/IncomeCheckStack/income-check-task-queue/IncomeCheckStacktasktopic6E1AF13E/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "incomechecktaskqueueIncomeCheckStacktasktopic6E1AF13E8689DCD7"
+          }
+        ],
+        "/IncomeCheckStack/CDKMetadata/Default": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CDKMetadata"
+          }
+        ],
+        "/IncomeCheckStack/BootstrapVersion": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BootstrapVersion"
+          }
+        ],
+        "/IncomeCheckStack/CheckBootstrapVersion": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CheckBootstrapVersion"
+          }
+        ]
+      },
+      "displayName": "IncomeCheckStack"
+    },
+    "Tree": {
+      "type": "cdk:tree",
+      "properties": {
+        "file": "tree.json"
+      }
+    }
+  }
+}

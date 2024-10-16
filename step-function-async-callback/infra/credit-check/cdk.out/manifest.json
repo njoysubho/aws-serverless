@@ -1,0 +1,101 @@
+{
+  "version": "36.0.0",
+  "artifacts": {
+    "CreditCheckStack.assets": {
+      "type": "cdk:asset-manifest",
+      "properties": {
+        "file": "CreditCheckStack.assets.json",
+        "requiresBootstrapStackVersion": 6,
+        "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
+      }
+    },
+    "CreditCheckStack": {
+      "type": "aws:cloudformation:stack",
+      "environment": "aws://unknown-account/us-west-2",
+      "properties": {
+        "templateFile": "CreditCheckStack.template.json",
+        "terminationProtection": false,
+        "validateOnSynth": false,
+        "assumeRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-deploy-role-${AWS::AccountId}-us-west-2",
+        "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-cfn-exec-role-${AWS::AccountId}-us-west-2",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-us-west-2/307349782d9aac826ca5538e0fe0a5ed4b0ceed6d1e5f7108ce82920ca904d33.json",
+        "requiresBootstrapStackVersion": 6,
+        "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
+        "additionalDependencies": [
+          "CreditCheckStack.assets"
+        ],
+        "lookupRole": {
+          "arn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-lookup-role-${AWS::AccountId}-us-west-2",
+          "requiresBootstrapStackVersion": 8,
+          "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
+        }
+      },
+      "dependencies": [
+        "CreditCheckStack.assets"
+      ],
+      "metadata": {
+        "/CreditCheckStack/lambdaExecutionRole/Policy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "lambdaExecutionRolePolicy7C6FDEA8"
+          }
+        ],
+        "/CreditCheckStack/credit-check-lambda/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "creditchecklambda0CA3ED6E"
+          }
+        ],
+        "/CreditCheckStack/credit-check-lambda/SqsEventSource:CreditCheckStackcreditchecktaskqueue41E0B919/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "creditchecklambdaSqsEventSourceCreditCheckStackcreditchecktaskqueue41E0B919953628E1"
+          }
+        ],
+        "/CreditCheckStack/credit-check-task-queue/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "creditchecktaskqueue2C6FB6AC"
+          }
+        ],
+        "/CreditCheckStack/credit-check-task-queue/Policy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "creditchecktaskqueuePolicy1DF48EA7"
+          }
+        ],
+        "/CreditCheckStack/credit-check-task-queue/CreditCheckStacktasktopicDA36CA42/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "creditchecktaskqueueCreditCheckStacktasktopicDA36CA426E22F602"
+          }
+        ],
+        "/CreditCheckStack/CDKMetadata/Default": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CDKMetadata"
+          }
+        ],
+        "/CreditCheckStack/BootstrapVersion": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BootstrapVersion"
+          }
+        ],
+        "/CreditCheckStack/CheckBootstrapVersion": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CheckBootstrapVersion"
+          }
+        ]
+      },
+      "displayName": "CreditCheckStack"
+    },
+    "Tree": {
+      "type": "cdk:tree",
+      "properties": {
+        "file": "tree.json"
+      }
+    }
+  }
+}

@@ -1,0 +1,233 @@
+{
+ "Resources": {
+  "lambdaExecutionRolePolicy7C6FDEA8": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "sqs:ReceiveMessage",
+        "sqs:ChangeMessageVisibility",
+        "sqs:GetQueueUrl",
+        "sqs:DeleteMessage",
+        "sqs:GetQueueAttributes"
+       ],
+       "Effect": "Allow",
+       "Resource": {
+        "Fn::GetAtt": [
+         "creditchecktaskqueue2C6FB6AC",
+         "Arn"
+        ]
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "lambdaExecutionRolePolicy7C6FDEA8",
+    "Roles": [
+     "BasicLambdaExecution"
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "CreditCheckStack/lambdaExecutionRole/Policy/Resource"
+   }
+  },
+  "creditchecklambda0CA3ED6E": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Architectures": [
+     "arm64"
+    ],
+    "Code": {
+     "S3Bucket": {
+      "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-us-west-2"
+     },
+     "S3Key": "574590ba215f6c0f523456a80df7fbbf5c39a796a0ab5c111824efccdd402ab7.zip"
+    },
+    "Description": "Check credit score",
+    "FunctionName": "credit-check-lambda",
+    "Handler": "bootstrap",
+    "MemorySize": 128,
+    "Role": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:aws:iam::",
+       {
+        "Ref": "AWS::AccountId"
+       },
+       ":role/BasicLambdaExecution"
+      ]
+     ]
+    },
+    "Runtime": "provided.al2"
+   },
+   "DependsOn": [
+    "lambdaExecutionRolePolicy7C6FDEA8"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "CreditCheckStack/credit-check-lambda/Resource",
+    "aws:asset:path": "asset.574590ba215f6c0f523456a80df7fbbf5c39a796a0ab5c111824efccdd402ab7.zip",
+    "aws:asset:is-bundled": false,
+    "aws:asset:property": "Code"
+   }
+  },
+  "creditchecklambdaSqsEventSourceCreditCheckStackcreditchecktaskqueue41E0B919953628E1": {
+   "Type": "AWS::Lambda::EventSourceMapping",
+   "Properties": {
+    "EventSourceArn": {
+     "Fn::GetAtt": [
+      "creditchecktaskqueue2C6FB6AC",
+      "Arn"
+     ]
+    },
+    "FunctionName": {
+     "Ref": "creditchecklambda0CA3ED6E"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "CreditCheckStack/credit-check-lambda/SqsEventSource:CreditCheckStackcreditchecktaskqueue41E0B919/Resource"
+   }
+  },
+  "creditchecktaskqueue2C6FB6AC": {
+   "Type": "AWS::SQS::Queue",
+   "Properties": {
+    "QueueName": "credit-check-task-queue"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "CreditCheckStack/credit-check-task-queue/Resource"
+   }
+  },
+  "creditchecktaskqueuePolicy1DF48EA7": {
+   "Type": "AWS::SQS::QueuePolicy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sqs:SendMessage",
+       "Condition": {
+        "ArnEquals": {
+         "aws:SourceArn": {
+          "Fn::Join": [
+           "",
+           [
+            "arn:aws:sns:us-west-2:",
+            {
+             "Ref": "AWS::AccountId"
+            },
+            ":task"
+           ]
+          ]
+         }
+        }
+       },
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "sns.amazonaws.com"
+       },
+       "Resource": {
+        "Fn::GetAtt": [
+         "creditchecktaskqueue2C6FB6AC",
+         "Arn"
+        ]
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "Queues": [
+     {
+      "Ref": "creditchecktaskqueue2C6FB6AC"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "CreditCheckStack/credit-check-task-queue/Policy/Resource"
+   }
+  },
+  "creditchecktaskqueueCreditCheckStacktasktopicDA36CA426E22F602": {
+   "Type": "AWS::SNS::Subscription",
+   "Properties": {
+    "Endpoint": {
+     "Fn::GetAtt": [
+      "creditchecktaskqueue2C6FB6AC",
+      "Arn"
+     ]
+    },
+    "FilterPolicy": {
+     "Task": [
+      {
+       "prefix": "credit-check"
+      }
+     ]
+    },
+    "Protocol": "sqs",
+    "Region": "us-west-2",
+    "TopicArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:aws:sns:us-west-2:",
+       {
+        "Ref": "AWS::AccountId"
+       },
+       ":task"
+      ]
+     ]
+    }
+   },
+   "DependsOn": [
+    "creditchecktaskqueuePolicy1DF48EA7"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "CreditCheckStack/credit-check-task-queue/CreditCheckStacktasktopicDA36CA42/Resource"
+   }
+  },
+  "CDKMetadata": {
+   "Type": "AWS::CDK::Metadata",
+   "Properties": {
+    "Analytics": "v2:deflate64:H4sIAAAAAAAA/2VPy07EMAz8lr273m2LkDiyCG5IsOW+ctNQmbZJqRMqFOXfUVr2gbjYMx55PC4wL+9wt6FZMtV0Wc81hsqR6uCgxfpJaaBZjoFpwPBie1bf8PBuVhShp6FuCMOTN8qxNUk748cvbVy1mDzTOLJpk/x/GkHKI4loJ3ifGkiJe6867fYkGuRTMLx67XXaX8FSL3muaAQxgqHytaiJx1OqP/zNjqySd4ywXKwctb/5Tn9HaG2ORYH5tqFpZrOlobm92XwIczZ543jQeFj7DyQX90xHAQAA"
+   },
+   "Metadata": {
+    "aws:cdk:path": "CreditCheckStack/CDKMetadata/Default"
+   }
+  }
+ },
+ "Parameters": {
+  "BootstrapVersion": {
+   "Type": "AWS::SSM::Parameter::Value<String>",
+   "Default": "/cdk-bootstrap/hnb659fds/version",
+   "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]"
+  }
+ },
+ "Rules": {
+  "CheckBootstrapVersion": {
+   "Assertions": [
+    {
+     "Assert": {
+      "Fn::Not": [
+       {
+        "Fn::Contains": [
+         [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5"
+         ],
+         {
+          "Ref": "BootstrapVersion"
+         }
+        ]
+       }
+      ]
+     },
+     "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI."
+    }
+   ]
+  }
+ }
+}

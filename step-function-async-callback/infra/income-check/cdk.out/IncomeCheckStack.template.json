@@ -1,0 +1,233 @@
+{
+ "Resources": {
+  "lambdaExecutionRolePolicy7C6FDEA8": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "sqs:ReceiveMessage",
+        "sqs:ChangeMessageVisibility",
+        "sqs:GetQueueUrl",
+        "sqs:DeleteMessage",
+        "sqs:GetQueueAttributes"
+       ],
+       "Effect": "Allow",
+       "Resource": {
+        "Fn::GetAtt": [
+         "incomechecktaskqueueA2B9D2A3",
+         "Arn"
+        ]
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "lambdaExecutionRolePolicy7C6FDEA8",
+    "Roles": [
+     "BasicLambdaExecution"
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "IncomeCheckStack/lambdaExecutionRole/Policy/Resource"
+   }
+  },
+  "incomechecklambdaCFA53C7C": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Architectures": [
+     "arm64"
+    ],
+    "Code": {
+     "S3Bucket": {
+      "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-us-west-2"
+     },
+     "S3Key": "262d9f69232e8df456fde66382396febfc1b09277fe1e78b671de382a1758358.zip"
+    },
+    "Description": "Income Check score",
+    "FunctionName": "income-check-lambda",
+    "Handler": "bootstrap",
+    "MemorySize": 128,
+    "Role": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:aws:iam::",
+       {
+        "Ref": "AWS::AccountId"
+       },
+       ":role/BasicLambdaExecution"
+      ]
+     ]
+    },
+    "Runtime": "provided.al2"
+   },
+   "DependsOn": [
+    "lambdaExecutionRolePolicy7C6FDEA8"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "IncomeCheckStack/income-check-lambda/Resource",
+    "aws:asset:path": "asset.262d9f69232e8df456fde66382396febfc1b09277fe1e78b671de382a1758358.zip",
+    "aws:asset:is-bundled": false,
+    "aws:asset:property": "Code"
+   }
+  },
+  "incomechecklambdaSqsEventSourceIncomeCheckStackincomechecktaskqueue0B3F64C29A9E8743": {
+   "Type": "AWS::Lambda::EventSourceMapping",
+   "Properties": {
+    "EventSourceArn": {
+     "Fn::GetAtt": [
+      "incomechecktaskqueueA2B9D2A3",
+      "Arn"
+     ]
+    },
+    "FunctionName": {
+     "Ref": "incomechecklambdaCFA53C7C"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "IncomeCheckStack/income-check-lambda/SqsEventSource:IncomeCheckStackincomechecktaskqueue0B3F64C2/Resource"
+   }
+  },
+  "incomechecktaskqueueA2B9D2A3": {
+   "Type": "AWS::SQS::Queue",
+   "Properties": {
+    "QueueName": "income-check-task-queue"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "IncomeCheckStack/income-check-task-queue/Resource"
+   }
+  },
+  "incomechecktaskqueuePolicy85D885BA": {
+   "Type": "AWS::SQS::QueuePolicy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sqs:SendMessage",
+       "Condition": {
+        "ArnEquals": {
+         "aws:SourceArn": {
+          "Fn::Join": [
+           "",
+           [
+            "arn:aws:sns:us-west-2:",
+            {
+             "Ref": "AWS::AccountId"
+            },
+            ":task"
+           ]
+          ]
+         }
+        }
+       },
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "sns.amazonaws.com"
+       },
+       "Resource": {
+        "Fn::GetAtt": [
+         "incomechecktaskqueueA2B9D2A3",
+         "Arn"
+        ]
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "Queues": [
+     {
+      "Ref": "incomechecktaskqueueA2B9D2A3"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "IncomeCheckStack/income-check-task-queue/Policy/Resource"
+   }
+  },
+  "incomechecktaskqueueIncomeCheckStacktasktopic6E1AF13E8689DCD7": {
+   "Type": "AWS::SNS::Subscription",
+   "Properties": {
+    "Endpoint": {
+     "Fn::GetAtt": [
+      "incomechecktaskqueueA2B9D2A3",
+      "Arn"
+     ]
+    },
+    "FilterPolicy": {
+     "Task": [
+      {
+       "prefix": "income-check"
+      }
+     ]
+    },
+    "Protocol": "sqs",
+    "Region": "us-west-2",
+    "TopicArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:aws:sns:us-west-2:",
+       {
+        "Ref": "AWS::AccountId"
+       },
+       ":task"
+      ]
+     ]
+    }
+   },
+   "DependsOn": [
+    "incomechecktaskqueuePolicy85D885BA"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "IncomeCheckStack/income-check-task-queue/IncomeCheckStacktasktopic6E1AF13E/Resource"
+   }
+  },
+  "CDKMetadata": {
+   "Type": "AWS::CDK::Metadata",
+   "Properties": {
+    "Analytics": "v2:deflate64:H4sIAAAAAAAA/2VPy07EMAz8lr273m2LkDiyCG5IsOW+ctNQmbZJqRMqFOXfUVr2gbjYMx55PC4wL+9wt6FZMtV0Wc81hsqR6uCgxfpJaaBZjoFpwPBie1bf8PBuVhShp6FuCMOTN8qxNUk748cvbVy1mDzTOLJpk/x/GkHKI4loJ3ifGkiJe6867fYkGuRTMLx67XXaX8FSL3muaAQxgqHytaiJx1OqP/zNjqySd4ywXKwctb/5Tn9HaG2ORYH5tqFpZrOlobm92XwIczZ543jQeFj7DyQX90xHAQAA"
+   },
+   "Metadata": {
+    "aws:cdk:path": "IncomeCheckStack/CDKMetadata/Default"
+   }
+  }
+ },
+ "Parameters": {
+  "BootstrapVersion": {
+   "Type": "AWS::SSM::Parameter::Value<String>",
+   "Default": "/cdk-bootstrap/hnb659fds/version",
+   "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]"
+  }
+ },
+ "Rules": {
+  "CheckBootstrapVersion": {
+   "Assertions": [
+    {
+     "Assert": {
+      "Fn::Not": [
+       {
+        "Fn::Contains": [
+         [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5"
+         ],
+         {
+          "Ref": "BootstrapVersion"
+         }
+        ]
+       }
+      ]
+     },
+     "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI."
+    }
+   ]
+  }
+ }
+}

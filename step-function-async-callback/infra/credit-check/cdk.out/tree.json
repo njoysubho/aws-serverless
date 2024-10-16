@@ -1,0 +1,374 @@
+{
+  "version": "tree-0.1",
+  "tree": {
+    "id": "App",
+    "path": "",
+    "children": {
+      "CreditCheckStack": {
+        "id": "CreditCheckStack",
+        "path": "CreditCheckStack",
+        "children": {
+          "lambdaExecutionRole": {
+            "id": "lambdaExecutionRole",
+            "path": "CreditCheckStack/lambdaExecutionRole",
+            "children": {
+              "Policy": {
+                "id": "Policy",
+                "path": "CreditCheckStack/lambdaExecutionRole/Policy",
+                "children": {
+                  "Resource": {
+                    "id": "Resource",
+                    "path": "CreditCheckStack/lambdaExecutionRole/Policy/Resource",
+                    "attributes": {
+                      "aws:cdk:cloudformation:type": "AWS::IAM::Policy",
+                      "aws:cdk:cloudformation:props": {
+                        "policyDocument": {
+                          "Statement": [
+                            {
+                              "Action": [
+                                "sqs:ReceiveMessage",
+                                "sqs:ChangeMessageVisibility",
+                                "sqs:GetQueueUrl",
+                                "sqs:DeleteMessage",
+                                "sqs:GetQueueAttributes"
+                              ],
+                              "Effect": "Allow",
+                              "Resource": {
+                                "Fn::GetAtt": [
+                                  "creditchecktaskqueue2C6FB6AC",
+                                  "Arn"
+                                ]
+                              }
+                            }
+                          ],
+                          "Version": "2012-10-17"
+                        },
+                        "policyName": "lambdaExecutionRolePolicy7C6FDEA8",
+                        "roles": [
+                          "BasicLambdaExecution"
+                        ]
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_iam.CfnPolicy",
+                      "version": "2.139.0"
+                    }
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_iam.Policy",
+                  "version": "2.139.0"
+                }
+              }
+            },
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.Resource",
+              "version": "2.139.0"
+            }
+          },
+          "credit-check-lambda": {
+            "id": "credit-check-lambda",
+            "path": "CreditCheckStack/credit-check-lambda",
+            "children": {
+              "Code": {
+                "id": "Code",
+                "path": "CreditCheckStack/credit-check-lambda/Code",
+                "children": {
+                  "Stage": {
+                    "id": "Stage",
+                    "path": "CreditCheckStack/credit-check-lambda/Code/Stage",
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.AssetStaging",
+                      "version": "2.139.0"
+                    }
+                  },
+                  "AssetBucket": {
+                    "id": "AssetBucket",
+                    "path": "CreditCheckStack/credit-check-lambda/Code/AssetBucket",
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_s3.BucketBase",
+                      "version": "2.139.0"
+                    }
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_s3_assets.Asset",
+                  "version": "2.139.0"
+                }
+              },
+              "Resource": {
+                "id": "Resource",
+                "path": "CreditCheckStack/credit-check-lambda/Resource",
+                "attributes": {
+                  "aws:cdk:cloudformation:type": "AWS::Lambda::Function",
+                  "aws:cdk:cloudformation:props": {
+                    "architectures": [
+                      "arm64"
+                    ],
+                    "code": {
+                      "s3Bucket": {
+                        "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-us-west-2"
+                      },
+                      "s3Key": "574590ba215f6c0f523456a80df7fbbf5c39a796a0ab5c111824efccdd402ab7.zip"
+                    },
+                    "description": "Check credit score",
+                    "functionName": "credit-check-lambda",
+                    "handler": "bootstrap",
+                    "memorySize": 128,
+                    "role": {
+                      "Fn::Join": [
+                        "",
+                        [
+                          "arn:aws:iam::",
+                          {
+                            "Ref": "AWS::AccountId"
+                          },
+                          ":role/BasicLambdaExecution"
+                        ]
+                      ]
+                    },
+                    "runtime": "provided.al2"
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_lambda.CfnFunction",
+                  "version": "2.139.0"
+                }
+              },
+              "SqsEventSource:CreditCheckStackcreditchecktaskqueue41E0B919": {
+                "id": "SqsEventSource:CreditCheckStackcreditchecktaskqueue41E0B919",
+                "path": "CreditCheckStack/credit-check-lambda/SqsEventSource:CreditCheckStackcreditchecktaskqueue41E0B919",
+                "children": {
+                  "Resource": {
+                    "id": "Resource",
+                    "path": "CreditCheckStack/credit-check-lambda/SqsEventSource:CreditCheckStackcreditchecktaskqueue41E0B919/Resource",
+                    "attributes": {
+                      "aws:cdk:cloudformation:type": "AWS::Lambda::EventSourceMapping",
+                      "aws:cdk:cloudformation:props": {
+                        "eventSourceArn": {
+                          "Fn::GetAtt": [
+                            "creditchecktaskqueue2C6FB6AC",
+                            "Arn"
+                          ]
+                        },
+                        "functionName": {
+                          "Ref": "creditchecklambda0CA3ED6E"
+                        }
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_lambda.CfnEventSourceMapping",
+                      "version": "2.139.0"
+                    }
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_lambda.EventSourceMapping",
+                  "version": "2.139.0"
+                }
+              }
+            },
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.aws_lambda.Function",
+              "version": "2.139.0"
+            }
+          },
+          "credit-check-task-queue": {
+            "id": "credit-check-task-queue",
+            "path": "CreditCheckStack/credit-check-task-queue",
+            "children": {
+              "Resource": {
+                "id": "Resource",
+                "path": "CreditCheckStack/credit-check-task-queue/Resource",
+                "attributes": {
+                  "aws:cdk:cloudformation:type": "AWS::SQS::Queue",
+                  "aws:cdk:cloudformation:props": {
+                    "queueName": "credit-check-task-queue"
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_sqs.CfnQueue",
+                  "version": "2.139.0"
+                }
+              },
+              "Policy": {
+                "id": "Policy",
+                "path": "CreditCheckStack/credit-check-task-queue/Policy",
+                "children": {
+                  "Resource": {
+                    "id": "Resource",
+                    "path": "CreditCheckStack/credit-check-task-queue/Policy/Resource",
+                    "attributes": {
+                      "aws:cdk:cloudformation:type": "AWS::SQS::QueuePolicy",
+                      "aws:cdk:cloudformation:props": {
+                        "policyDocument": {
+                          "Statement": [
+                            {
+                              "Action": "sqs:SendMessage",
+                              "Condition": {
+                                "ArnEquals": {
+                                  "aws:SourceArn": {
+                                    "Fn::Join": [
+                                      "",
+                                      [
+                                        "arn:aws:sns:us-west-2:",
+                                        {
+                                          "Ref": "AWS::AccountId"
+                                        },
+                                        ":task"
+                                      ]
+                                    ]
+                                  }
+                                }
+                              },
+                              "Effect": "Allow",
+                              "Principal": {
+                                "Service": "sns.amazonaws.com"
+                              },
+                              "Resource": {
+                                "Fn::GetAtt": [
+                                  "creditchecktaskqueue2C6FB6AC",
+                                  "Arn"
+                                ]
+                              }
+                            }
+                          ],
+                          "Version": "2012-10-17"
+                        },
+                        "queues": [
+                          {
+                            "Ref": "creditchecktaskqueue2C6FB6AC"
+                          }
+                        ]
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_sqs.CfnQueuePolicy",
+                      "version": "2.139.0"
+                    }
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_sqs.QueuePolicy",
+                  "version": "2.139.0"
+                }
+              },
+              "CreditCheckStacktasktopicDA36CA42": {
+                "id": "CreditCheckStacktasktopicDA36CA42",
+                "path": "CreditCheckStack/credit-check-task-queue/CreditCheckStacktasktopicDA36CA42",
+                "children": {
+                  "Resource": {
+                    "id": "Resource",
+                    "path": "CreditCheckStack/credit-check-task-queue/CreditCheckStacktasktopicDA36CA42/Resource",
+                    "attributes": {
+                      "aws:cdk:cloudformation:type": "AWS::SNS::Subscription",
+                      "aws:cdk:cloudformation:props": {
+                        "endpoint": {
+                          "Fn::GetAtt": [
+                            "creditchecktaskqueue2C6FB6AC",
+                            "Arn"
+                          ]
+                        },
+                        "filterPolicy": {
+                          "Task": [
+                            {
+                              "prefix": "credit-check"
+                            }
+                          ]
+                        },
+                        "protocol": "sqs",
+                        "region": "us-west-2",
+                        "topicArn": {
+                          "Fn::Join": [
+                            "",
+                            [
+                              "arn:aws:sns:us-west-2:",
+                              {
+                                "Ref": "AWS::AccountId"
+                              },
+                              ":task"
+                            ]
+                          ]
+                        }
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_sns.CfnSubscription",
+                      "version": "2.139.0"
+                    }
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_sns.Subscription",
+                  "version": "2.139.0"
+                }
+              }
+            },
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.aws_sqs.Queue",
+              "version": "2.139.0"
+            }
+          },
+          "task-topic": {
+            "id": "task-topic",
+            "path": "CreditCheckStack/task-topic",
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.aws_sns.TopicBase",
+              "version": "2.139.0"
+            }
+          },
+          "CDKMetadata": {
+            "id": "CDKMetadata",
+            "path": "CreditCheckStack/CDKMetadata",
+            "children": {
+              "Default": {
+                "id": "Default",
+                "path": "CreditCheckStack/CDKMetadata/Default",
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.CfnResource",
+                  "version": "2.139.0"
+                }
+              }
+            },
+            "constructInfo": {
+              "fqn": "constructs.Construct",
+              "version": "10.3.0"
+            }
+          },
+          "BootstrapVersion": {
+            "id": "BootstrapVersion",
+            "path": "CreditCheckStack/BootstrapVersion",
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.CfnParameter",
+              "version": "2.139.0"
+            }
+          },
+          "CheckBootstrapVersion": {
+            "id": "CheckBootstrapVersion",
+            "path": "CreditCheckStack/CheckBootstrapVersion",
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.CfnRule",
+              "version": "2.139.0"
+            }
+          }
+        },
+        "constructInfo": {
+          "fqn": "aws-cdk-lib.Stack",
+          "version": "2.139.0"
+        }
+      },
+      "Tree": {
+        "id": "Tree",
+        "path": "Tree",
+        "constructInfo": {
+          "fqn": "constructs.Construct",
+          "version": "10.3.0"
+        }
+      }
+    },
+    "constructInfo": {
+      "fqn": "aws-cdk-lib.App",
+      "version": "2.139.0"
+    }
+  }
+}

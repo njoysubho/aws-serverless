@@ -1,0 +1,374 @@
+{
+  "version": "tree-0.1",
+  "tree": {
+    "id": "App",
+    "path": "",
+    "children": {
+      "IncomeCheckStack": {
+        "id": "IncomeCheckStack",
+        "path": "IncomeCheckStack",
+        "children": {
+          "lambdaExecutionRole": {
+            "id": "lambdaExecutionRole",
+            "path": "IncomeCheckStack/lambdaExecutionRole",
+            "children": {
+              "Policy": {
+                "id": "Policy",
+                "path": "IncomeCheckStack/lambdaExecutionRole/Policy",
+                "children": {
+                  "Resource": {
+                    "id": "Resource",
+                    "path": "IncomeCheckStack/lambdaExecutionRole/Policy/Resource",
+                    "attributes": {
+                      "aws:cdk:cloudformation:type": "AWS::IAM::Policy",
+                      "aws:cdk:cloudformation:props": {
+                        "policyDocument": {
+                          "Statement": [
+                            {
+                              "Action": [
+                                "sqs:ReceiveMessage",
+                                "sqs:ChangeMessageVisibility",
+                                "sqs:GetQueueUrl",
+                                "sqs:DeleteMessage",
+                                "sqs:GetQueueAttributes"
+                              ],
+                              "Effect": "Allow",
+                              "Resource": {
+                                "Fn::GetAtt": [
+                                  "incomechecktaskqueueA2B9D2A3",
+                                  "Arn"
+                                ]
+                              }
+                            }
+                          ],
+                          "Version": "2012-10-17"
+                        },
+                        "policyName": "lambdaExecutionRolePolicy7C6FDEA8",
+                        "roles": [
+                          "BasicLambdaExecution"
+                        ]
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_iam.CfnPolicy",
+                      "version": "2.139.0"
+                    }
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_iam.Policy",
+                  "version": "2.139.0"
+                }
+              }
+            },
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.Resource",
+              "version": "2.139.0"
+            }
+          },
+          "income-check-lambda": {
+            "id": "income-check-lambda",
+            "path": "IncomeCheckStack/income-check-lambda",
+            "children": {
+              "Code": {
+                "id": "Code",
+                "path": "IncomeCheckStack/income-check-lambda/Code",
+                "children": {
+                  "Stage": {
+                    "id": "Stage",
+                    "path": "IncomeCheckStack/income-check-lambda/Code/Stage",
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.AssetStaging",
+                      "version": "2.139.0"
+                    }
+                  },
+                  "AssetBucket": {
+                    "id": "AssetBucket",
+                    "path": "IncomeCheckStack/income-check-lambda/Code/AssetBucket",
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_s3.BucketBase",
+                      "version": "2.139.0"
+                    }
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_s3_assets.Asset",
+                  "version": "2.139.0"
+                }
+              },
+              "Resource": {
+                "id": "Resource",
+                "path": "IncomeCheckStack/income-check-lambda/Resource",
+                "attributes": {
+                  "aws:cdk:cloudformation:type": "AWS::Lambda::Function",
+                  "aws:cdk:cloudformation:props": {
+                    "architectures": [
+                      "arm64"
+                    ],
+                    "code": {
+                      "s3Bucket": {
+                        "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-us-west-2"
+                      },
+                      "s3Key": "262d9f69232e8df456fde66382396febfc1b09277fe1e78b671de382a1758358.zip"
+                    },
+                    "description": "Income Check score",
+                    "functionName": "income-check-lambda",
+                    "handler": "bootstrap",
+                    "memorySize": 128,
+                    "role": {
+                      "Fn::Join": [
+                        "",
+                        [
+                          "arn:aws:iam::",
+                          {
+                            "Ref": "AWS::AccountId"
+                          },
+                          ":role/BasicLambdaExecution"
+                        ]
+                      ]
+                    },
+                    "runtime": "provided.al2"
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_lambda.CfnFunction",
+                  "version": "2.139.0"
+                }
+              },
+              "SqsEventSource:IncomeCheckStackincomechecktaskqueue0B3F64C2": {
+                "id": "SqsEventSource:IncomeCheckStackincomechecktaskqueue0B3F64C2",
+                "path": "IncomeCheckStack/income-check-lambda/SqsEventSource:IncomeCheckStackincomechecktaskqueue0B3F64C2",
+                "children": {
+                  "Resource": {
+                    "id": "Resource",
+                    "path": "IncomeCheckStack/income-check-lambda/SqsEventSource:IncomeCheckStackincomechecktaskqueue0B3F64C2/Resource",
+                    "attributes": {
+                      "aws:cdk:cloudformation:type": "AWS::Lambda::EventSourceMapping",
+                      "aws:cdk:cloudformation:props": {
+                        "eventSourceArn": {
+                          "Fn::GetAtt": [
+                            "incomechecktaskqueueA2B9D2A3",
+                            "Arn"
+                          ]
+                        },
+                        "functionName": {
+                          "Ref": "incomechecklambdaCFA53C7C"
+                        }
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_lambda.CfnEventSourceMapping",
+                      "version": "2.139.0"
+                    }
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_lambda.EventSourceMapping",
+                  "version": "2.139.0"
+                }
+              }
+            },
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.aws_lambda.Function",
+              "version": "2.139.0"
+            }
+          },
+          "income-check-task-queue": {
+            "id": "income-check-task-queue",
+            "path": "IncomeCheckStack/income-check-task-queue",
+            "children": {
+              "Resource": {
+                "id": "Resource",
+                "path": "IncomeCheckStack/income-check-task-queue/Resource",
+                "attributes": {
+                  "aws:cdk:cloudformation:type": "AWS::SQS::Queue",
+                  "aws:cdk:cloudformation:props": {
+                    "queueName": "income-check-task-queue"
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_sqs.CfnQueue",
+                  "version": "2.139.0"
+                }
+              },
+              "Policy": {
+                "id": "Policy",
+                "path": "IncomeCheckStack/income-check-task-queue/Policy",
+                "children": {
+                  "Resource": {
+                    "id": "Resource",
+                    "path": "IncomeCheckStack/income-check-task-queue/Policy/Resource",
+                    "attributes": {
+                      "aws:cdk:cloudformation:type": "AWS::SQS::QueuePolicy",
+                      "aws:cdk:cloudformation:props": {
+                        "policyDocument": {
+                          "Statement": [
+                            {
+                              "Action": "sqs:SendMessage",
+                              "Condition": {
+                                "ArnEquals": {
+                                  "aws:SourceArn": {
+                                    "Fn::Join": [
+                                      "",
+                                      [
+                                        "arn:aws:sns:us-west-2:",
+                                        {
+                                          "Ref": "AWS::AccountId"
+                                        },
+                                        ":task"
+                                      ]
+                                    ]
+                                  }
+                                }
+                              },
+                              "Effect": "Allow",
+                              "Principal": {
+                                "Service": "sns.amazonaws.com"
+                              },
+                              "Resource": {
+                                "Fn::GetAtt": [
+                                  "incomechecktaskqueueA2B9D2A3",
+                                  "Arn"
+                                ]
+                              }
+                            }
+                          ],
+                          "Version": "2012-10-17"
+                        },
+                        "queues": [
+                          {
+                            "Ref": "incomechecktaskqueueA2B9D2A3"
+                          }
+                        ]
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_sqs.CfnQueuePolicy",
+                      "version": "2.139.0"
+                    }
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_sqs.QueuePolicy",
+                  "version": "2.139.0"
+                }
+              },
+              "IncomeCheckStacktasktopic6E1AF13E": {
+                "id": "IncomeCheckStacktasktopic6E1AF13E",
+                "path": "IncomeCheckStack/income-check-task-queue/IncomeCheckStacktasktopic6E1AF13E",
+                "children": {
+                  "Resource": {
+                    "id": "Resource",
+                    "path": "IncomeCheckStack/income-check-task-queue/IncomeCheckStacktasktopic6E1AF13E/Resource",
+                    "attributes": {
+                      "aws:cdk:cloudformation:type": "AWS::SNS::Subscription",
+                      "aws:cdk:cloudformation:props": {
+                        "endpoint": {
+                          "Fn::GetAtt": [
+                            "incomechecktaskqueueA2B9D2A3",
+                            "Arn"
+                          ]
+                        },
+                        "filterPolicy": {
+                          "Task": [
+                            {
+                              "prefix": "income-check"
+                            }
+                          ]
+                        },
+                        "protocol": "sqs",
+                        "region": "us-west-2",
+                        "topicArn": {
+                          "Fn::Join": [
+                            "",
+                            [
+                              "arn:aws:sns:us-west-2:",
+                              {
+                                "Ref": "AWS::AccountId"
+                              },
+                              ":task"
+                            ]
+                          ]
+                        }
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_sns.CfnSubscription",
+                      "version": "2.139.0"
+                    }
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_sns.Subscription",
+                  "version": "2.139.0"
+                }
+              }
+            },
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.aws_sqs.Queue",
+              "version": "2.139.0"
+            }
+          },
+          "task-topic": {
+            "id": "task-topic",
+            "path": "IncomeCheckStack/task-topic",
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.aws_sns.TopicBase",
+              "version": "2.139.0"
+            }
+          },
+          "CDKMetadata": {
+            "id": "CDKMetadata",
+            "path": "IncomeCheckStack/CDKMetadata",
+            "children": {
+              "Default": {
+                "id": "Default",
+                "path": "IncomeCheckStack/CDKMetadata/Default",
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.CfnResource",
+                  "version": "2.139.0"
+                }
+              }
+            },
+            "constructInfo": {
+              "fqn": "constructs.Construct",
+              "version": "10.3.0"
+            }
+          },
+          "BootstrapVersion": {
+            "id": "BootstrapVersion",
+            "path": "IncomeCheckStack/BootstrapVersion",
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.CfnParameter",
+              "version": "2.139.0"
+            }
+          },
+          "CheckBootstrapVersion": {
+            "id": "CheckBootstrapVersion",
+            "path": "IncomeCheckStack/CheckBootstrapVersion",
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.CfnRule",
+              "version": "2.139.0"
+            }
+          }
+        },
+        "constructInfo": {
+          "fqn": "aws-cdk-lib.Stack",
+          "version": "2.139.0"
+        }
+      },
+      "Tree": {
+        "id": "Tree",
+        "path": "Tree",
+        "constructInfo": {
+          "fqn": "constructs.Construct",
+          "version": "10.3.0"
+        }
+      }
+    },
+    "constructInfo": {
+      "fqn": "aws-cdk-lib.App",
+      "version": "2.139.0"
+    }
+  }
+}
