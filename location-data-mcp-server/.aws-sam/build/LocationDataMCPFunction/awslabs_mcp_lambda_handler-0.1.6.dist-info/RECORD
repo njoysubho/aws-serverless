@@ -1,0 +1,10 @@
+awslabs/mcp_lambda_handler/__init__.py,sha256=9MgpLE3vIUMb3rLrvY_GddvXCv9As2y3IV7eUkQuYUk,754
+awslabs/mcp_lambda_handler/mcp_lambda_handler.py,sha256=Kh3z3vr8IZ0BjYFVGKktNE2r8fEP1mS2VynYRsasLSM,17268
+awslabs/mcp_lambda_handler/session.py,sha256=xbKFBsVp9SuYILPLzHHxMeoc9Q1Y_6jNul58LK6kXBg,6097
+awslabs/mcp_lambda_handler/types.py,sha256=emVtMa6aQ_GXRIw1T4ggUrADCL_2kHFzVRKtme6sUWA,3684
+awslabs_mcp_lambda_handler-0.1.6.dist-info/METADATA,sha256=59CUIbYieQBuuWkPToqyQzedmuOghki6JNisI7Kn59k,3862
+awslabs_mcp_lambda_handler-0.1.6.dist-info/WHEEL,sha256=qtCwoSJWgHk21S1Kb4ihdzI2rlJ1ZKaIurTj_ngOhyQ,87
+awslabs_mcp_lambda_handler-0.1.6.dist-info/entry_points.txt,sha256=tYt08PWX1l_u6tY-VaePMAoEouDcnLVOji7WGGPnSYY,86
+awslabs_mcp_lambda_handler-0.1.6.dist-info/licenses/LICENSE,sha256=xx0jnfkXJvxRnG63LTGOxlggYnIysveWIZ6H3PNdCrQ,11357
+awslabs_mcp_lambda_handler-0.1.6.dist-info/licenses/NOTICE,sha256=KZEvB1sIdsBtPxqkOdxq8wvhmxC_5rUoPdMLRbz_nyc,614
+awslabs_mcp_lambda_handler-0.1.6.dist-info/RECORD,,

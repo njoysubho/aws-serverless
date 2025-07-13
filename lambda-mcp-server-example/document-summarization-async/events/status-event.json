@@ -1,0 +1,29 @@
+{
+  "httpMethod": "GET",
+  "path": "/status/test-job-12345",
+  "pathParameters": {
+    "jobId": "test-job-12345"
+  },
+  "queryStringParameters": null,
+  "headers": {
+    "Accept": "application/json",
+    "Content-Type": "application/json"
+  },
+  "multiValueHeaders": {},
+  "requestContext": {
+    "accountId": "123456789012",
+    "apiId": "test-api",
+    "protocol": "HTTP/1.1",
+    "httpMethod": "GET",
+    "path": "/status/test-job-12345",
+    "stage": "test",
+    "requestId": "test-request-id-2",
+    "requestTime": "09/Apr/2015:12:34:56 +0000",
+    "requestTimeEpoch": 1428582896000,
+    "identity": {
+      "sourceIp": "127.0.0.1"
+    }
+  },
+  "body": null,
+  "isBase64Encoded": false
+}

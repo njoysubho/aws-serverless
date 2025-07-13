@@ -1,0 +1,14 @@
+{
+  "resource_id": "location-data-mcp-server",
+  "authorization_servers": [
+    "https://auth.example.com",
+    "https://auth2.example.com"
+  ],
+  "required_scopes": [
+    "mcp:location:read",
+    "mcp:location:search"
+  ],
+  "audience": "location-data-api",
+  "resource_metadata_url": "/.well-known/oauth-protected-resource",
+  "enable_authorization": true
+} 

@@ -1,0 +1,57 @@
+{
+  "Records": [
+    {
+      "eventID": "test-event-id",
+      "eventName": "MODIFY",
+      "eventVersion": "1.1",
+      "eventSource": "aws:dynamodb",
+      "awsRegion": "us-east-1",
+      "dynamodb": {
+        "ApproximateCreationDateTime": 1545082649.0,
+        "Keys": {
+          "jobId": {
+            "S": "test-job-12345"
+          }
+        },
+        "NewImage": {
+          "jobId": {
+            "S": "test-job-12345"
+          },
+          "status": {
+            "S": "completed"
+          },
+          "summary": {
+            "S": "This is a test summary of the AI document discussing machine learning advances and their impact on various industries."
+          },
+          "createdAt": {
+            "S": "2024-01-15T10:30:00Z"
+          },
+          "completedAt": {
+            "S": "2024-01-15T10:32:30Z"
+          },
+          "updatedAt": {
+            "S": "2024-01-15T10:32:30Z"
+          }
+        },
+        "OldImage": {
+          "jobId": {
+            "S": "test-job-12345"
+          },
+          "status": {
+            "S": "processing"
+          },
+          "createdAt": {
+            "S": "2024-01-15T10:30:00Z"
+          },
+          "updatedAt": {
+            "S": "2024-01-15T10:31:00Z"
+          }
+        },
+        "SequenceNumber": "123456789012345678901",
+        "SizeBytes": 256,
+        "StreamViewType": "NEW_AND_OLD_IMAGES"
+      },
+      "eventSourceARN": "arn:aws:dynamodb:us-east-1:123456789012:table/test-jobs-table/stream/2024-01-15T10:00:00.000"
+    }
+  ]
+}

@@ -1,0 +1,2 @@
+[console_scripts]
+awslabs.mcp-lambda-handler = awslabs.mcp_lambda_handler.server:main

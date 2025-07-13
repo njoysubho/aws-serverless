@@ -1,0 +1,175 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: SNS-SQS-Lambda-DynamoDB fanout architecture
+
+Globals:
+  Function:
+    Timeout: 30
+    MemorySize: 512
+    Runtime: java17
+    Architectures:
+      - x86_64
+
+Parameters:
+  Environment:
+    Type: String
+    Default: dev
+    Description: Environment name
+
+Resources:
+  # DynamoDB Table
+  MessagesTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub "${Environment}-messages-table"
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      StreamSpecification:
+        StreamViewType: NEW_AND_OLD_IMAGES
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+      Tags:
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Application
+          Value: sns-sqs-lambda
+
+  # SNS Topic
+  MessageTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: !Sub "${Environment}-message-topic"
+      DisplayName: Message Topic for SNS-SQS fanout
+      Tags:
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Application
+          Value: sns-sqs-lambda
+
+  # SQS Queue
+  MessageQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Sub "${Environment}-message-queue"
+      VisibilityTimeoutSeconds: 180  # 3 times the Lambda timeout
+      MessageRetentionPeriod: 1209600  # 14 days
+      RedrivePolicy:
+        deadLetterTargetArn: !GetAtt MessageDeadLetterQueue.Arn
+        maxReceiveCount: 3
+      Tags:
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Application
+          Value: sns-sqs-lambda
+
+  # Dead Letter Queue
+  MessageDeadLetterQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Sub "${Environment}-message-dlq"
+      MessageRetentionPeriod: 1209600  # 14 days
+      Tags:
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Application
+          Value: sns-sqs-lambda
+
+  # SQS Queue Policy to allow SNS to send messages
+  MessageQueuePolicy:
+    Type: AWS::SQS::QueuePolicy
+    Properties:
+      PolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: sns.amazonaws.com
+            Action: sqs:SendMessage
+            Resource: !GetAtt MessageQueue.Arn
+            Condition:
+              ArnEquals:
+                aws:SourceArn: !Ref MessageTopic
+      Queues:
+        - !Ref MessageQueue
+
+  # SNS Subscription to SQS
+  MessageQueueSubscription:
+    Type: AWS::SNS::Subscription
+    Properties:
+      TopicArn: !Ref MessageTopic
+      Endpoint: !GetAtt MessageQueue.Arn
+      Protocol: sqs
+      RawMessageDelivery: false
+
+  # Lambda Function
+  MessageProcessorFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "${Environment}-message-processor"
+      CodeUri: target/sns-sqs-dynamodb-lambda-1.0.0.jar
+      Handler: com.example.handler.SnsSqusLambdaHandler::handleRequest
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref MessagesTable
+          AWS_REGION: !Ref AWS::Region
+      Policies:
+        - DynamoDBWritePolicy:
+            TableName: !Ref MessagesTable
+      Events:
+        SQSEvent:
+          Type: SQS
+          Properties:
+            Queue: !GetAtt MessageQueue.Arn
+            BatchSize: 10
+            MaximumBatchingWindowInSeconds: 5
+      Tags:
+        Environment: !Ref Environment
+        Application: sns-sqs-lambda
+
+  # CloudWatch Log Group for Lambda
+  MessageProcessorLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${Environment}-message-processor"
+      RetentionInDays: 14
+
+Outputs:
+  SNSTopicArn:
+    Description: ARN of the SNS Topic
+    Value: !Ref MessageTopic
+    Export:
+      Name: !Sub "${Environment}-message-topic-arn"
+
+  SQSQueueArn:
+    Description: ARN of the SQS Queue
+    Value: !GetAtt MessageQueue.Arn
+    Export:
+      Name: !Sub "${Environment}-message-queue-arn"
+
+  SQSQueueUrl:
+    Description: URL of the SQS Queue
+    Value: !Ref MessageQueue
+    Export:
+      Name: !Sub "${Environment}-message-queue-url"
+
+  DynamoDBTableName:
+    Description: Name of the DynamoDB Table
+    Value: !Ref MessagesTable
+    Export:
+      Name: !Sub "${Environment}-messages-table-name"
+
+  LambdaFunctionArn:
+    Description: ARN of the Lambda Function
+    Value: !GetAtt MessageProcessorFunction.Arn
+    Export:
+      Name: !Sub "${Environment}-message-processor-arn"
+
+  DeadLetterQueueUrl:
+    Description: URL of the Dead Letter Queue
+    Value: !Ref MessageDeadLetterQueue
+    Export:
+      Name: !Sub "${Environment}-message-dlq-url"

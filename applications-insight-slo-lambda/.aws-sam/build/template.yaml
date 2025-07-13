@@ -1,0 +1,28 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: SAM Template to deploy a Lambda function with API Gateway
+Resources:
+  ApplicationsInsightsSLO:
+    Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: go1.x
+      SamResourceId: ApplicationsInsightsSLO
+    Properties:
+      Handler: bootstrap
+      FunctionName: ApplicationsInsightsSLO
+      PackageType: Zip
+      Runtime: provided.al2
+      Architectures:
+      - arm64
+      CodeUri: ApplicationsInsightsSLO
+      Description: A simple "Hello, World!" Lambda function
+      MemorySize: 128
+      Timeout: 5
+      Policies:
+      - AWSLambdaBasicExecutionRole
+      Events:
+        AppSLOEvent:
+          Type: Api
+          Properties:
+            Path: /hello
+            Method: get

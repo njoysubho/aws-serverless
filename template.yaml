@@ -1,0 +1,116 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Java Lambda function triggered by SQS messages from SNS
+
+Globals:
+  Function:
+    Timeout: 30
+    Runtime: java17
+    MemorySize: 512
+    Architectures:
+      - x86_64
+
+Resources:
+  # SNS Topic
+  NotificationTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: notification-topic
+      DisplayName: Notification Topic
+
+  # SQS Queue
+  ProcessingQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: processing-queue
+      VisibilityTimeoutSeconds: 300
+      RedrivePolicy:
+        deadLetterTargetArn: !GetAtt DeadLetterQueue.Arn
+        maxReceiveCount: 3
+
+  # Dead Letter Queue
+  DeadLetterQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: processing-queue-dlq
+      MessageRetentionPeriod: 1209600  # 14 days
+
+  # SQS Queue Policy to allow SNS to send messages
+  QueuePolicy:
+    Type: AWS::SQS::QueuePolicy
+    Properties:
+      Queues:
+        - !Ref ProcessingQueue
+      PolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: sns.amazonaws.com
+            Action:
+              - sqs:SendMessage
+            Resource: !GetAtt ProcessingQueue.Arn
+            Condition:
+              ArnEquals:
+                aws:SourceArn: !Ref NotificationTopic
+
+  # SNS Subscription to SQS
+  SnsToSqsSubscription:
+    Type: AWS::SNS::Subscription
+    Properties:
+      Protocol: sqs
+      TopicArn: !Ref NotificationTopic
+      Endpoint: !GetAtt ProcessingQueue.Arn
+
+  # Lambda Function
+  SqsProcessorFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: sqs-processor-function
+      CodeUri: target/lambda-sqs-processor-1.0.0.jar
+      Handler: com.example.SqsMessageProcessor::handleRequest
+      Events:
+        SQSEvent:
+          Type: SQS
+          Properties:
+            Queue: !GetAtt ProcessingQueue.Arn
+            BatchSize: 10
+            MaximumBatchingWindowInSeconds: 5
+      Environment:
+        Variables:
+          JAVA_TOOL_OPTIONS: -XX:+TieredCompilation -XX:TieredStopAtLevel=1
+      Policies:
+        - SQSPollerPolicy:
+            QueueName: !GetAtt ProcessingQueue.QueueName
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - logs:CreateLogGroup
+                - logs:CreateLogStream
+                - logs:PutLogEvents
+              Resource: '*'
+
+Outputs:
+  SnsTopicArn:
+    Description: ARN of the SNS Topic
+    Value: !Ref NotificationTopic
+    Export:
+      Name: !Sub "${AWS::StackName}-SnsTopicArn"
+
+  SqsQueueArn:
+    Description: ARN of the SQS Queue
+    Value: !GetAtt ProcessingQueue.Arn
+    Export:
+      Name: !Sub "${AWS::StackName}-SqsQueueArn"
+
+  SqsQueueUrl:
+    Description: URL of the SQS Queue
+    Value: !Ref ProcessingQueue
+    Export:
+      Name: !Sub "${AWS::StackName}-SqsQueueUrl"
+
+  LambdaFunctionArn:
+    Description: ARN of the Lambda Function
+    Value: !GetAtt SqsProcessorFunction.Arn
+    Export:
+      Name: !Sub "${AWS::StackName}-LambdaFunctionArn"

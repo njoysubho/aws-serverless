@@ -1,0 +1,38 @@
+{
+  "httpMethod": "POST",
+  "path": "/upload",
+  "pathParameters": null,
+  "queryStringParameters": null,
+  "headers": {
+    "Accept": "application/json",
+    "Content-Type": "application/json",
+    "User-Agent": "PostmanRuntime/7.28.4"
+  },
+  "multiValueHeaders": {},
+  "requestContext": {
+    "accountId": "123456789012",
+    "apiId": "test-api",
+    "protocol": "HTTP/1.1",
+    "httpMethod": "POST",
+    "path": "/upload",
+    "stage": "test",
+    "requestId": "test-request-id",
+    "requestTime": "09/Apr/2015:12:34:56 +0000",
+    "requestTimeEpoch": 1428582896000,
+    "identity": {
+      "cognitoIdentityPoolId": null,
+      "accountId": null,
+      "cognitoIdentityId": null,
+      "caller": null,
+      "sourceIp": "127.0.0.1",
+      "accessKey": null,
+      "cognitoAuthenticationType": null,
+      "cognitoAuthenticationProvider": null,
+      "userArn": null,
+      "userAgent": "Custom User Agent String",
+      "user": null
+    }
+  },
+  "body": "{\"document\":\"Artificial Intelligence has transformed the way we approach problem-solving across industries. Machine learning algorithms can now process vast datasets to identify patterns that humans might miss. Deep learning networks have revolutionized image recognition, natural language processing, and predictive analytics. Companies are leveraging AI to automate routine tasks, enhance customer experiences, and make data-driven decisions. However, the rapid advancement of AI also raises important questions about ethics, privacy, and the future of work. As we continue to integrate AI into our daily lives, it's crucial to develop responsible AI practices that benefit society while minimizing potential risks.\",\"type\":\"text\",\"summary_length\":\"medium\"}",
+  "isBase64Encoded": false
+}

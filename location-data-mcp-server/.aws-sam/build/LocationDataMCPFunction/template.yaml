@@ -1,0 +1,108 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Location Data MCP Server - Lambda function with new API Gateway
+
+Globals:
+  Function:
+    Timeout: 30
+    MemorySize: 512
+    Runtime: python3.11
+    Architectures:
+      - x86_64
+
+Parameters:
+  Stage:
+    Type: String
+    Default: Prod
+    Description: API Gateway stage
+
+Resources:
+  LocationDataMCPApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: !Ref Stage
+      Auth:
+        ApiKeyRequired: true
+      Cors:
+        AllowMethods: '''GET,POST,PUT,DELETE,OPTIONS'''
+        AllowHeaders: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'''
+        AllowOrigin: '''*'''
+      EndpointConfiguration:
+        Type: REGIONAL
+
+  LocationDataMCPFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub ${AWS::StackName}-location-data-mcp
+      CodeUri: .
+      Handler: main.lambda_handler
+      Runtime: python3.11
+      Timeout: 30
+      MemorySize: 512
+      Role: !Sub arn:aws:iam::${AWS::AccountId}:role/BasicLambdaExecution
+      Events:
+        ApiGatewayProxyEvent:
+          Type: Api
+          Properties:
+            RestApiId: !Ref LocationDataMCPApi
+            Path: /{proxy+}
+            Method: ANY
+            Auth:
+              ApiKeyRequired: true
+        ApiGatewayRootEvent:
+          Type: Api
+          Properties:
+            RestApiId: !Ref LocationDataMCPApi
+            Path: /
+            Method: ANY
+            Auth:
+              ApiKeyRequired: true
+  # API Key
+  LocationDataMCPApiKey:
+    Type: AWS::ApiGateway::ApiKey
+    Properties:
+      Name: !Sub ${AWS::StackName}-api-key
+      Description: API Key for Location Data MCP Server
+      Enabled: true
+      StageKeys:
+        - RestApiId: !Ref LocationDataMCPApi
+          StageName: !Ref Stage
+
+  # Usage Plan
+  LocationDataMCPUsagePlan:
+    Type: AWS::ApiGateway::UsagePlan
+    Properties:
+      UsagePlanName: !Sub ${AWS::StackName}-usage-plan
+      Description: Usage plan for Location Data MCP Server
+      ApiStages:
+        - ApiId: !Ref LocationDataMCPApi
+          Stage: !Ref Stage
+      Throttle:
+        RateLimit: 100
+        BurstLimit: 200
+      Quota:
+        Limit: 10000
+        Period: DAY
+
+  # Usage Plan Key (Links API Key to Usage Plan)
+  LocationDataMCPUsagePlanKey:
+    Type: AWS::ApiGateway::UsagePlanKey
+    Properties:
+      KeyId: !Ref LocationDataMCPApiKey
+      KeyType: API_KEY
+      UsagePlanId: !Ref LocationDataMCPUsagePlan
+
+
+Outputs:
+  LocationDataMCPFunction:
+    Description: Lambda Function ARN
+    Value: !GetAtt LocationDataMCPFunction.Arn
+  LocationDataMCPFunctionName:
+    Description: Lambda Function Name
+    Value: !Ref LocationDataMCPFunction
+  ApiGatewayEndpoint:
+    Description: API Gateway endpoint URL
+    Value: !Sub https://${LocationDataMCPApi}.execute-api.${AWS::Region}.amazonaws.com/${Stage}/
+  ApiGatewayId:
+    Description: API Gateway ID
+    Value: !Ref LocationDataMCPApi
